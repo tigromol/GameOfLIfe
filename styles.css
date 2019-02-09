@@ -8,9 +8,24 @@
     position: relative;
     float:left;
 }
+#info{
+    display:table;
+    padding:10px;
+}
+.info{
+    padding:5px;
+    
+}
+#controlpanel{
+    padding:10px;
+    display:table;
+    width:100px;
+}
 .control{
+    width:100px;
+    padding:5px;
     position:relative;
-    float:left;
+    display:inline-block;
     
 }
 table{
@@ -20,8 +35,15 @@ table{
     
 }
 #rand{
-    width:40px;
+    width:75px;
 }
 label{
     padding: 2px;
+}
+#finish{
+    font-size: 30px;
+    height: 50px;
+    width: 500px;
+    position:relative;
+    float:left;
 }

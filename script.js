@@ -127,6 +127,7 @@ var Field = function (_React$Component) {
             field: randStart(_this.props.size, _this.props.rand),
             history: [],
             active: false,
+            period: 0,
             rand: 0,
             gen: 0
 
@@ -169,9 +170,26 @@ var Field = function (_React$Component) {
             this.setState({ gen: 0, history: [], field: randStart(this.props.size, this.state.rand) });
         }
     }, {
+        key: 'finish',
+        value: function finish() {
+            if (this.state.period != 0) {
+                return this.state.period == 1 ? React.createElement(
+                    'div',
+                    { id: 'finish' },
+                    'There is stable configuration'
+                ) : React.createElement(
+                    'div',
+                    { id: 'finish' },
+                    'There is periodic configuration with period = ',
+                    this.state.period
+                );
+            }
+        }
+    }, {
         key: 'nextGen',
         value: function nextGen() {
             this.setState({ field: stateUpdate(this.state.field), gen: this.state.gen + 1 });
+            this.isFinished();
             this.historyWrite();
         }
     }, {
@@ -185,7 +203,7 @@ var Field = function (_React$Component) {
         value: function life() {
             var _this3 = this;
 
-            this.setState({ life: true });
+            this.setState({ life: true, period: 0 });
             this.timerID = setInterval(function () {
                 return _this3.nextGen();
             }, 1000);
@@ -209,6 +227,22 @@ var Field = function (_React$Component) {
             }
         }
     }, {
+        key: 'isFinished',
+        value: function isFinished() {
+            var currentValue = this.state.field.slice();
+            for (var i = 0; i < this.state.history.length; i++) {
+                var prevValue = this.state.history[i].slice();
+                if (currentValue.map(function (x) {
+                    return x.join();
+                }).join() == prevValue.map(function (x) {
+                    return x.join();
+                }).join()) {
+                    this.stop();
+                    this.setState({ period: this.state.history.length - i });
+                }
+            }
+        }
+    }, {
         key: 'render',
         value: function render() {
             var _this4 = this;
@@ -227,7 +261,6 @@ var Field = function (_React$Component) {
                 ));
                 squares = [];
             }
-            console.log(this.state.history.length);
 
             return React.createElement(
                 'div',
@@ -243,27 +276,35 @@ var Field = function (_React$Component) {
                 ),
                 React.createElement(
                     'div',
-                    null,
-                    this.lifeHandler()
+                    { id: 'controlpanel' },
+                    React.createElement(
+                        'div',
+                        null,
+                        this.lifeHandler()
+                    ),
+                    React.createElement(
+                        'button',
+                        { className: 'control', onClick: this.randomize.bind(this) },
+                        'Randomize'
+                    ),
+                    React.createElement('input', { className: 'control', id: 'rand', type: 'number', min: '0', max: '100', name: 'randomness', defaultValue: '0', onChange: function onChange() {
+                            return _this4.setState({ rand: document.getElementById('rand').value / 100 });
+                        } })
                 ),
                 React.createElement(
-                    'button',
-                    { className: 'control', onClick: this.randomize.bind(this) },
-                    'Randomize'
-                ),
-                React.createElement(
-                    'label',
-                    { className: 'control', htmlFor: 'rand' },
-                    'threshold'
-                ),
-                React.createElement('input', { className: 'control', id: 'rand', type: 'number', min: '0', max: '100', name: 'randomness', defaultValue: '0', onChange: function onChange() {
-                        return _this4.setState({ rand: document.getElementById('rand').value / 100 });
-                    } }),
-                React.createElement(
-                    'p',
-                    null,
-                    'Current generation:',
-                    this.state.gen
+                    'div',
+                    { id: 'info' },
+                    React.createElement(
+                        'div',
+                        { className: 'info' },
+                        'Current generation:',
+                        this.state.gen
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'info' },
+                        this.finish()
+                    )
                 )
             );
         }

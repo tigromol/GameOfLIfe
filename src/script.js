@@ -91,6 +91,7 @@ class Field extends React.Component{
             field: randStart(this.props.size,this.props.rand),
             history: [],
             active: false, 
+            period: 0,
             rand: 0,
             gen:0
             
@@ -118,9 +119,13 @@ class Field extends React.Component{
             
             this.setState({gen: 0,history:[], field:randStart(this.props.size,this.state.rand)});
         }
-        
+        finish(){
+            if(this.state.period!=0){
+            return this.state.period==1?<div id='finish'>There is stable configuration</div>:<div id='finish'>There is periodic configuration with period = {this.state.period}</div>
+        }}
         nextGen(){
             this.setState({field:stateUpdate(this.state.field),gen:this.state.gen+1})
+            this.isFinished();
             this.historyWrite();
         }
         stop(){
@@ -128,7 +133,7 @@ class Field extends React.Component{
             clearInterval(this.timerID);
         }
         life(){
-            this.setState({life:true});
+            this.setState({life:true,period:0});
             this.timerID = setInterval(
                 () => this.nextGen(),
                 1000
@@ -143,6 +148,17 @@ class Field extends React.Component{
                 return <button className='control' id='start' onClick={this.life.bind(this)}>Start</button>
             }
         }
+        isFinished(){
+            let currentValue = this.state.field.slice(); 
+            for(let i=0;i<this.state.history.length;i++){
+                let prevValue=this.state.history[i].slice()
+                if(currentValue.map(x=>x.join()).join() == prevValue.map(x=>x.join()).join() ){
+                    this.stop();
+                    this.setState({period:this.state.history.length-i});
+                    
+                }
+            }
+        }
         render() {
             var rows = [];
             let squares = [];
@@ -154,15 +170,19 @@ class Field extends React.Component{
             rows.push(<tr key={k++} className="row">{squares}</tr>);
             squares = [];
             }
-            console.log(this.state.history.length);
             
             return <div><table><tbody>{rows}</tbody></table>
+            <div id='controlpanel'>
             <div>{ this.lifeHandler()}</div>
             <button className='control' onClick={this.randomize.bind(this)} >Randomize</button>
             
-            <label className='control' htmlFor='rand'>threshold</label>
+            
             <input className='control' id='rand' type='number' min='0' max='100' name='randomness' defaultValue='0' onChange={()=>this.setState({rand:document.getElementById('rand').value/100})} ></input>
-            <p>Current generation:{this.state.gen}</p>
+            </div>
+            <div id='info'>
+            <div className='info'>Current generation:{this.state.gen}</div>
+            <div className='info'>{this.finish()}</div>
+            </div>
             </div>
             }
         componentDidMount(){
