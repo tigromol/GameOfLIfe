@@ -237,7 +237,7 @@ var Field = function (_React$Component) {
                 }).join() == prevValue.map(function (x) {
                     return x.join();
                 }).join()) {
-                    this.stop();
+
                     this.setState({ period: this.state.history.length - i });
                 }
             }

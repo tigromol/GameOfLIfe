@@ -153,7 +153,7 @@ class Field extends React.Component{
             for(let i=0;i<this.state.history.length;i++){
                 let prevValue=this.state.history[i].slice()
                 if(currentValue.map(x=>x.join()).join() == prevValue.map(x=>x.join()).join() ){
-                    this.stop();
+                    
                     this.setState({period:this.state.history.length-i});
                     
                 }
