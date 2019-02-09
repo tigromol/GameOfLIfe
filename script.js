@@ -2,6 +2,8 @@
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -20,6 +22,7 @@ function randStart(size, rand) {
     });
 }
 function stateUpdate(mat) {
+    //**TODO pseudo infinite field */
     var currentState = mat.map(function (x) {
         return x.slice();
     });
@@ -122,6 +125,8 @@ var Field = function (_React$Component) {
 
         _this.state = {
             field: randStart(_this.props.size, _this.props.rand),
+            history: [],
+            active: false,
             rand: 0,
             gen: 0
 
@@ -129,6 +134,26 @@ var Field = function (_React$Component) {
     }
 
     _createClass(Field, [{
+        key: 'historyWrite',
+        value: function historyWrite() {
+            var _this2 = this;
+
+            if (this.state.history.length < 10) {
+
+                this.setState(function (prevState) {
+                    return { history: [].concat(_toConsumableArray(prevState.history), [_this2.state.field]) };
+                });
+            }
+            if (this.state.history.length == 10) {
+
+                this.setState(function (prevState) {
+                    return { history: [].concat(_toConsumableArray(prevState.history.filter(function (_, i) {
+                            return i !== 0;
+                        })), [_this2.state.field]) };
+                });
+            }
+        }
+    }, {
         key: 'renderCell',
         value: function renderCell(props) {
             if (props.value == 1) {
@@ -141,35 +166,56 @@ var Field = function (_React$Component) {
         key: 'randomize',
         value: function randomize() {
 
-            this.setState({ gen: 0, rand: document.getElementById('rand').value / 100, field: randStart(this.props.size, this.state.rand) });
+            this.setState({ gen: 0, history: [], field: randStart(this.props.size, this.state.rand) });
         }
     }, {
         key: 'nextGen',
         value: function nextGen() {
             this.setState({ field: stateUpdate(this.state.field), gen: this.state.gen + 1 });
+            this.historyWrite();
         }
     }, {
         key: 'stop',
         value: function stop() {
+            this.setState({ life: false });
             clearInterval(this.timerID);
         }
     }, {
         key: 'life',
         value: function life() {
-            var _this2 = this;
+            var _this3 = this;
 
-            this.setState({ gen: 0 });
+            this.setState({ life: true });
             this.timerID = setInterval(function () {
-                return _this2.nextGen();
+                return _this3.nextGen();
             }, 1000);
+        }
+    }, {
+        key: 'lifeHandler',
+        value: function lifeHandler() {
+            if (this.state.life) {
+                return React.createElement(
+                    'button',
+                    { className: 'control', onClick: this.stop.bind(this) },
+                    'Stop'
+                );
+            }
+            if (!this.state.life) {
+                return React.createElement(
+                    'button',
+                    { className: 'control', id: 'start', onClick: this.life.bind(this) },
+                    'Start'
+                );
+            }
         }
     }, {
         key: 'render',
         value: function render() {
+            var _this4 = this;
+
             var rows = [];
             var squares = [];
             var k = 0;
-            var fie = this.state.field;
             for (var r = 0; r < this.state.field.length; r++) {
                 for (var i = 0; i < this.state.field[r].length; i++) {
                     squares.push(React.createElement(this.renderCell, { value: this.state.field[r][i], key: k++ }));
@@ -181,6 +227,7 @@ var Field = function (_React$Component) {
                 ));
                 squares = [];
             }
+            console.log(this.state.history.length);
 
             return React.createElement(
                 'div',
@@ -195,9 +242,9 @@ var Field = function (_React$Component) {
                     )
                 ),
                 React.createElement(
-                    'button',
-                    { className: 'control', id: 'start', onClick: this.life.bind(this) },
-                    'Start'
+                    'div',
+                    null,
+                    this.lifeHandler()
                 ),
                 React.createElement(
                     'button',
@@ -205,16 +252,13 @@ var Field = function (_React$Component) {
                     'Randomize'
                 ),
                 React.createElement(
-                    'button',
-                    { className: 'control', onClick: this.stop.bind(this) },
-                    'Stop'
-                ),
-                React.createElement(
                     'label',
                     { className: 'control', htmlFor: 'rand' },
                     'threshold'
                 ),
-                React.createElement('input', { className: 'control', id: 'rand', type: 'number', min: '0', max: '100', name: 'randomness', defaultValue: '0' }),
+                React.createElement('input', { className: 'control', id: 'rand', type: 'number', min: '0', max: '100', name: 'randomness', defaultValue: '0', onChange: function onChange() {
+                        return _this4.setState({ rand: document.getElementById('rand').value / 100 });
+                    } }),
                 React.createElement(
                     'p',
                     null,
@@ -223,6 +267,9 @@ var Field = function (_React$Component) {
                 )
             );
         }
+    }, {
+        key: 'componentDidMount',
+        value: function componentDidMount() {}
     }]);
 
     return Field;

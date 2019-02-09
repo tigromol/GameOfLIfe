@@ -3,7 +3,7 @@ function randStart(size,rand){ //Function which set random starting state
 var matrix = new Array(size).fill(0).map(() => new Array(size).fill(0)); 
 return matrix.map(x=>x.map(()=>{return Math.random()<rand?1:0}))   
 }
-function stateUpdate(mat){
+function stateUpdate(mat){ //**TODO pseudo infinite field */
     const currentState = mat.map(x=>{return x.slice()});
     var nextState = mat.map(x=>{return x.slice()});
     for(let i=0;i<currentState.length;i++){
@@ -89,10 +89,23 @@ class Field extends React.Component{
         super(props);
         this.state={
             field: randStart(this.props.size,this.props.rand),
+            history: [],
+            active: false, 
             rand: 0,
             gen:0
             
         }}
+        historyWrite(){
+            if(this.state.history.length<10){
+                
+                this.setState(prevState=>({history:[...prevState.history,this.state.field]}));
+            }
+            if(this.state.history.length == 10){
+                
+                this.setState(prevState=>({history:[...prevState.history.filter((_,i)=>i!==0),this.state.field]}));
+            }
+        }
+
         renderCell(props){
             if(props.value==1){
                 return <td className='cell' id='alive' key ={props.skey} style={{backgroundColor:'red'}}></td>
@@ -103,45 +116,58 @@ class Field extends React.Component{
             }
         randomize(){
             
-            this.setState({gen: 0,rand: (document.getElementById('rand').value/100) ,field:randStart(this.props.size,this.state.rand)});
+            this.setState({gen: 0,history:[], field:randStart(this.props.size,this.state.rand)});
         }
         
         nextGen(){
             this.setState({field:stateUpdate(this.state.field),gen:this.state.gen+1})
+            this.historyWrite();
         }
         stop(){
+            this.setState({life:false});
             clearInterval(this.timerID);
         }
         life(){
-            this.setState({gen:0});
+            this.setState({life:true});
             this.timerID = setInterval(
                 () => this.nextGen(),
                 1000
               );
             
         }
+        lifeHandler(){
+            if(this.state.life){
+                return <button className='control' onClick={this.stop.bind(this)} >Stop</button>
+            }
+            if(!this.state.life){
+                return <button className='control' id='start' onClick={this.life.bind(this)}>Start</button>
+            }
+        }
         render() {
             var rows = [];
             let squares = [];
             var k=0;
-            let fie=this.state.field;
-                for (var r = 0; r < this.state.field.length; r++) {
-                    for (var i = 0; i<this.state.field[r].length; i++)  {
-                        squares.push(<this.renderCell value={this.state.field[r][i]} key={k++}/>);
-                    }
-                rows.push(<tr key={k++} className="row">{squares}</tr>);
-                squares = [];
+            for (var r = 0; r < this.state.field.length; r++) {
+                for (var i = 0; i<this.state.field[r].length; i++)  {
+                    squares.push(<this.renderCell value={this.state.field[r][i]} key={k++}/>);
                 }
-
-                return <div><table><tbody>{rows}</tbody></table>
-                <button className='control' id='start' onClick={this.life.bind(this)}>Start</button>
-                <button className='control' onClick={this.randomize.bind(this)} >Randomize</button>
-                <button className='control' onClick={this.stop.bind(this)} >Stop</button>
-                <label className='control' htmlFor='rand'>threshold</label>
-                <input className='control' id='rand' type='number' min='0' max='100' name='randomness' defaultValue='0' ></input>
-                <p>Current generation:{this.state.gen}</p>
-                </div>
+            rows.push(<tr key={k++} className="row">{squares}</tr>);
+            squares = [];
             }
+            console.log(this.state.history.length);
+            
+            return <div><table><tbody>{rows}</tbody></table>
+            <div>{ this.lifeHandler()}</div>
+            <button className='control' onClick={this.randomize.bind(this)} >Randomize</button>
+            
+            <label className='control' htmlFor='rand'>threshold</label>
+            <input className='control' id='rand' type='number' min='0' max='100' name='randomness' defaultValue='0' onChange={()=>this.setState({rand:document.getElementById('rand').value/100})} ></input>
+            <p>Current generation:{this.state.gen}</p>
+            </div>
+            }
+        componentDidMount(){
+            
+        }
             
               
     }
