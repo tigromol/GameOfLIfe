@@ -92,6 +92,7 @@ class Field extends React.Component{
         this.state={
             field: randStart(this.props.size,this.props.rand),
             history: [],
+            cellsAlive: 0,
             active: false, 
             period: 0,
             rand: 0.1,
@@ -100,9 +101,10 @@ class Field extends React.Component{
         }}
         historyWrite(){
             let tmp=this.state.field.slice().map(x=>x.join()).join();
+            this.setState({cellsAlive: tmp.split(',').filter(x=>x!='0').join().length});
             if(this.state.history.length < 10){
                 
-                this.setState({history : [this.state.history , tmp]});
+                this.setState({history : [...this.state.history , tmp]});
             }
             if(this.state.history.length == 10){
                 
@@ -152,7 +154,7 @@ class Field extends React.Component{
             }
         }
         isFinished(){
-            let currentValue = this.state.field.slice().join(); 
+            let currentValue = this.state.field.slice().map(x=>x.join()).join(); 
             for(let i = 0 ; i < this.state.history.length ; i ++){
                 let prevValue=this.state.history[i];
                 if(currentValue == prevValue){
@@ -173,7 +175,6 @@ class Field extends React.Component{
             rows.push(<tr key = {k ++} className="row">{squares}</tr>);
             squares = [];
             }
-            
             return <div><table><tbody>{rows}</tbody></table>
             <div id = 'controlpanel'>
             <div>{ this.lifeHandler()}</div>
@@ -184,6 +185,7 @@ class Field extends React.Component{
             </div>
             <div id = 'info'>
             <div className = 'info'>Current generation: {this.state.gen}</div>
+            <div className = 'info'>Cells alive: {this.state.cellsAlive}</div>
             <div className = 'info'>{this.finish()}</div>
             </div>
             </div>

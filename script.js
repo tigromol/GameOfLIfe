@@ -127,6 +127,7 @@ var Field = function (_React$Component) {
         _this.state = {
             field: randStart(_this.props.size, _this.props.rand),
             history: [],
+            cellsAlive: 0,
             active: false,
             period: 0,
             rand: 0.1,
@@ -141,9 +142,12 @@ var Field = function (_React$Component) {
             var tmp = this.state.field.slice().map(function (x) {
                 return x.join();
             }).join();
+            this.setState({ cellsAlive: tmp.split(',').filter(function (x) {
+                    return x != '0';
+                }).join().length });
             if (this.state.history.length < 10) {
 
-                this.setState({ history: [this.state.history, tmp] });
+                this.setState({ history: [].concat(_toConsumableArray(this.state.history), [tmp]) });
             }
             if (this.state.history.length == 10) {
 
@@ -229,7 +233,9 @@ var Field = function (_React$Component) {
     }, {
         key: 'isFinished',
         value: function isFinished() {
-            var currentValue = this.state.field.slice().join();
+            var currentValue = this.state.field.slice().map(function (x) {
+                return x.join();
+            }).join();
             for (var i = 0; i < this.state.history.length; i++) {
                 var prevValue = this.state.history[i];
                 if (currentValue == prevValue) {
@@ -257,7 +263,6 @@ var Field = function (_React$Component) {
                 ));
                 squares = [];
             }
-
             return React.createElement(
                 'div',
                 null,
@@ -295,6 +300,12 @@ var Field = function (_React$Component) {
                         { className: 'info' },
                         'Current generation: ',
                         this.state.gen
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'info' },
+                        'Cells alive: ',
+                        this.state.cellsAlive
                     ),
                     React.createElement(
                         'div',
