@@ -152,7 +152,7 @@ class Field extends React.Component{
             }
         }
         isFinished(){
-            let currentValue = this.state.field.slice().join; 
+            let currentValue = this.state.field.slice().join(); 
             for(let i = 0 ; i < this.state.history.length ; i ++){
                 let prevValue=this.state.history[i];
                 if(currentValue == prevValue){

@@ -229,7 +229,7 @@ var Field = function (_React$Component) {
     }, {
         key: 'isFinished',
         value: function isFinished() {
-            var currentValue = this.state.field.slice().join;
+            var currentValue = this.state.field.slice().join();
             for (var i = 0; i < this.state.history.length; i++) {
                 var prevValue = this.state.history[i];
                 if (currentValue == prevValue) {
