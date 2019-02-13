@@ -47,3 +47,9 @@ label{
     position:relative;
     float:left;
 }
+#alive{
+    background-color: red;
+}
+#dead{
+    background-color: white;
+}

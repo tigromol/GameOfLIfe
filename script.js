@@ -21,6 +21,7 @@ function randStart(size, rand) {
         });
     });
 }
+
 function stateUpdate(mat) {
     //**TODO pseudo infinite field */
     var currentState = mat.map(function (x) {
@@ -128,7 +129,7 @@ var Field = function (_React$Component) {
             history: [],
             active: false,
             period: 0,
-            rand: 0,
+            rand: 0.1,
             gen: 0
 
         };return _this;
@@ -137,20 +138,19 @@ var Field = function (_React$Component) {
     _createClass(Field, [{
         key: 'historyWrite',
         value: function historyWrite() {
-            var _this2 = this;
-
+            var tmp = this.state.field.slice().map(function (x) {
+                return x.join();
+            }).join();
             if (this.state.history.length < 10) {
 
-                this.setState(function (prevState) {
-                    return { history: [].concat(_toConsumableArray(prevState.history), [_this2.state.field]) };
-                });
+                this.setState({ history: [this.state.history, tmp] });
             }
             if (this.state.history.length == 10) {
 
                 this.setState(function (prevState) {
                     return { history: [].concat(_toConsumableArray(prevState.history.filter(function (_, i) {
                             return i !== 0;
-                        })), [_this2.state.field]) };
+                        })), [tmp]) };
                 });
             }
         }
@@ -158,9 +158,9 @@ var Field = function (_React$Component) {
         key: 'renderCell',
         value: function renderCell(props) {
             if (props.value == 1) {
-                return React.createElement('td', { className: 'cell', id: 'alive', key: props.skey, style: { backgroundColor: 'red' } });
+                return React.createElement('td', { className: 'cell', id: 'alive', key: props.skey });
             } else {
-                return React.createElement('td', { className: 'cell', id: 'dead', key: props.skey, style: { backgroundColor: 'white' } });
+                return React.createElement('td', { className: 'cell', id: 'dead', key: props.skey });
             }
         }
     }, {
@@ -201,11 +201,11 @@ var Field = function (_React$Component) {
     }, {
         key: 'life',
         value: function life() {
-            var _this3 = this;
+            var _this2 = this;
 
             this.setState({ life: true, period: 0 });
             this.timerID = setInterval(function () {
-                return _this3.nextGen();
+                return _this2.nextGen();
             }, 1000);
         }
     }, {
@@ -229,14 +229,10 @@ var Field = function (_React$Component) {
     }, {
         key: 'isFinished',
         value: function isFinished() {
-            var currentValue = this.state.field.slice();
+            var currentValue = this.state.field.slice().join;
             for (var i = 0; i < this.state.history.length; i++) {
-                var prevValue = this.state.history[i].slice();
-                if (currentValue.map(function (x) {
-                    return x.join();
-                }).join() == prevValue.map(function (x) {
-                    return x.join();
-                }).join()) {
+                var prevValue = this.state.history[i];
+                if (currentValue == prevValue) {
 
                     this.setState({ period: this.state.history.length - i });
                 }
@@ -245,7 +241,7 @@ var Field = function (_React$Component) {
     }, {
         key: 'render',
         value: function render() {
-            var _this4 = this;
+            var _this3 = this;
 
             var rows = [];
             var squares = [];
@@ -287,8 +283,8 @@ var Field = function (_React$Component) {
                         { className: 'control', onClick: this.randomize.bind(this) },
                         'Randomize'
                     ),
-                    React.createElement('input', { className: 'control', id: 'rand', type: 'number', min: '0', max: '100', name: 'randomness', defaultValue: '0', onChange: function onChange() {
-                            return _this4.setState({ rand: document.getElementById('rand').value / 100 });
+                    React.createElement('input', { className: 'control', id: 'rand', type: 'number', min: '0', max: '100', name: 'randomness', defaultValue: '10', onChange: function onChange() {
+                            return _this3.setState({ rand: document.getElementById('rand').value / 100 });
                         } })
                 ),
                 React.createElement(
@@ -297,7 +293,7 @@ var Field = function (_React$Component) {
                     React.createElement(
                         'div',
                         { className: 'info' },
-                        'Current generation:',
+                        'Current generation: ',
                         this.state.gen
                     ),
                     React.createElement(
@@ -308,9 +304,6 @@ var Field = function (_React$Component) {
                 )
             );
         }
-    }, {
-        key: 'componentDidMount',
-        value: function componentDidMount() {}
     }]);
 
     return Field;
